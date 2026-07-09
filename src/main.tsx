@@ -4,6 +4,7 @@ import "./index.css";
 import App from "./App.tsx";
 import Header from "./components/header.tsx";
 import NowPlayingBar from "./components/now-playing-bar.tsx";
+import { Analytics } from "@vercel/analytics/react";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -14,5 +15,6 @@ createRoot(document.getElementById("root")!).render(
       </div>
       <NowPlayingBar />
     </div>
+    <Analytics />
   </StrictMode>,
 );
