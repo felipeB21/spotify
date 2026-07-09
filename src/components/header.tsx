@@ -17,22 +17,24 @@ export default function Header() {
         </a>
         <Search />
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-3">
         <a
           href="https://github.com/felipeb21/spotify"
           target="_blank"
-          className="flex items-center gap-1 bg-white rounded-full p-2 text-black text-xs font-bold hover:bg-stone-200"
+          rel="noreferrer"
+          className="flex items-center gap-2 bg-white rounded-full p-2 text-black text-xs font-bold hover:bg-stone-200"
         >
           <img
             src="https://github.com/favicon.ico"
             alt="GitHub"
             className="rounded-full w-5 h-5"
           />
-          5.4k Stars
+          Star on GitHub
         </a>
         <a
           href="https://github.com/felipeb21"
           target="_blank"
+          rel="noreferrer"
           className="bg-stone-800 rounded-full hover:bg-stone-700 transition-colors"
         >
           <img
