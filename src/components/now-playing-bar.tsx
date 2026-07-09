@@ -1,13 +1,26 @@
-import { Play, SkipForward, SkipBack, Volume2, Pause } from "lucide-react";
+import {
+  Play,
+  SkipForward,
+  SkipBack,
+  Volume2,
+  Pause,
+  VolumeX,
+  Volume1,
+} from "lucide-react";
 import { Tooltip } from "./tooltip";
 import { useSongStore } from "../stores/song-store";
 import { songs } from "../data/songs";
 import { useEffect, useRef } from "react";
+import { useVolumeStore } from "../stores/volume-store";
 
 export default function NowPlayingBar() {
   const isPlaying = useSongStore((state) => state.isPlaying);
   const currentSong = useSongStore((state) => state.currentSong);
   const toggleIsPlaying = useSongStore((state) => state.toggleIsPlaying);
+  const isMuted = useVolumeStore((state) => state.isMuted);
+  const toggleIsMuted = useVolumeStore((state) => state.toggleIsMuted);
+  const volume = useVolumeStore((state) => state.volume);
+  const setVolume = useVolumeStore((state) => state.setVolume);
   const audioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
@@ -16,6 +29,17 @@ export default function NowPlayingBar() {
       audioRef.current.play();
     } else audioRef.current.pause();
   }, [isPlaying, currentSong]);
+
+  useEffect(() => {
+    if (!audioRef.current) return;
+    if (isMuted) {
+      audioRef.current.muted = true;
+    } else {
+      audioRef.current.muted = false;
+    }
+
+    audioRef.current.volume = volume;
+  }, [isMuted, volume]);
 
   const nextSong = () => {
     const i = songs.findIndex((song) => song.id == currentSong.id);
@@ -29,6 +53,13 @@ export default function NowPlayingBar() {
     const prevIndex = (i - 1 + songs.length) % songs.length;
     const song = songs[prevIndex];
     return toggleIsPlaying(song.id);
+  };
+
+  const handleBtnVolume = () => {
+    toggleIsMuted();
+    if (volume === 0) {
+      setVolume(0.01);
+    }
   };
 
   return (
@@ -83,12 +114,25 @@ export default function NowPlayingBar() {
         </div>
       </div>
       <div className="flex items-center gap-2">
-        <button className="cursor-pointer">
-          <Volume2 className="w-5 h-5" />
-        </button>
+        <Tooltip content={isMuted ? "Unmute" : "Mute"}>
+          <button className="cursor-pointer" onClick={handleBtnVolume}>
+            {isMuted || volume === 0 ? (
+              <VolumeX className="w-5 h-5" />
+            ) : volume < 0.4 ? (
+              <Volume1 className="w-5 h-5" />
+            ) : (
+              <Volume2 className="w-5 h-5" />
+            )}
+          </button>
+        </Tooltip>
         <input
           type="range"
           className="range accent-white focus:accent-green-500 h-1"
+          onChange={(e) => setVolume(Number(e.target.value))}
+          defaultValue={volume}
+          min={0}
+          max={1}
+          step={0.01}
         />
       </div>
     </div>

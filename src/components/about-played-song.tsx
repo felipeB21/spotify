@@ -18,9 +18,8 @@ export default function AboutPlayedSong() {
       </div>
       <div className="mt-10 bg-stone-800 rounded-lg">
         <div className="relative">
-          <h5 className="font-bold absolute  text-black p-2">
-            About <br />
-            the artist
+          <h5 className="font-bold absolute text-shadow-md text-black p-2">
+            About the artist
           </h5>
           <img
             src={currentSong.artist.image}
@@ -30,7 +29,7 @@ export default function AboutPlayedSong() {
         </div>
         <div className="p-4">
           <h2 className="font-bold">{currentSong.artist.name}</h2>
-          <p className="text-xs line-clamp-3">
+          <p className="text-xs line-clamp-2 text-stone-300">
             {currentSong.artist.description}
           </p>
         </div>
