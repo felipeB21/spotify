@@ -20,9 +20,13 @@ export const useVolumeStore = create<VolumeState>()(
         }));
       },
       toggleIsMuted: () => {
-        set((state) => ({
-          isMuted: !state.isMuted,
-        }));
+        set((state) => {
+          if (state.isMuted && state.volume === 0) {
+            return { isMuted: false, volume: 0.01 };
+          } else {
+            return { isMuted: !state.isMuted };
+          }
+        });
       },
     }),
     {

@@ -10,8 +10,9 @@ import {
 import { Tooltip } from "./tooltip";
 import { useSongStore } from "../stores/song-store";
 import { songs } from "../data/songs";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useVolumeStore } from "../stores/volume-store";
+import { formatTime } from "../lib/format-time";
 
 export default function NowPlayingBar() {
   const isPlaying = useSongStore((state) => state.isPlaying);
@@ -22,12 +23,17 @@ export default function NowPlayingBar() {
   const volume = useVolumeStore((state) => state.volume);
   const setVolume = useVolumeStore((state) => state.setVolume);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const [currentTime, setCurrentTime] = useState(0);
 
   useEffect(() => {
     if (!audioRef.current) return;
     if (isPlaying) {
-      audioRef.current.play();
+      audioRef.current.play().catch((e) => {
+        console.log(e);
+      });
     } else audioRef.current.pause();
+
+    setCurrentTime(0);
   }, [isPlaying, currentSong]);
 
   useEffect(() => {
@@ -42,29 +48,32 @@ export default function NowPlayingBar() {
   }, [isMuted, volume]);
 
   const nextSong = () => {
-    const i = songs.findIndex((song) => song.id == currentSong.id);
-    const nextIndex = (i + 1) % songs.length;
-    const song = songs[nextIndex];
+    const songCategory = songs.filter(
+      (song) => song.category === currentSong.category,
+    );
+    const i = songCategory.findIndex((song) => song.id == currentSong.id);
+    const nextIndex = (i + 1) % songCategory.length;
+    const song = songCategory[nextIndex];
     return toggleIsPlaying(song.id);
   };
 
   const previousSong = () => {
-    const i = songs.findIndex((song) => song.id == currentSong.id);
-    const prevIndex = (i - 1 + songs.length) % songs.length;
-    const song = songs[prevIndex];
+    const songCategory = songs.filter(
+      (song) => song.category === currentSong.category,
+    );
+    const i = songCategory.findIndex((song) => song.id == currentSong.id);
+    const prevIndex = (i - 1 + songCategory.length) % songCategory.length;
+    const song = songCategory[prevIndex];
     return toggleIsPlaying(song.id);
-  };
-
-  const handleBtnVolume = () => {
-    toggleIsMuted();
-    if (volume === 0) {
-      setVolume(0.01);
-    }
   };
 
   return (
     <div className="p-4 mx-3 h-20 flex items-center justify-between">
-      <audio ref={audioRef} src={currentSong.play_url} />
+      <audio
+        ref={audioRef}
+        src={currentSong.play_url}
+        onTimeUpdate={() => setCurrentTime(audioRef.current!.currentTime)}
+      />
 
       <div className="flex gap-4">
         <img
@@ -105,17 +114,27 @@ export default function NowPlayingBar() {
           </Tooltip>
         </div>
         <div className="flex items-center gap-2 text-xs">
-          <span>0:00</span>
+          <span>{formatTime(currentTime)}</span>
           <input
             type="range"
             className="range accent-white focus:accent-green-500 h-1 w-100"
+            min={0}
+            max={currentSong.duration / 1000}
+            value={currentTime}
+            onChange={(e) => {
+              const newTime = Number(e.target.value);
+              setCurrentTime(newTime);
+              if (audioRef.current) {
+                audioRef.current.currentTime = newTime;
+              }
+            }}
           />
-          <span>3:32</span>
+          <span>{formatTime(currentSong.duration / 1000)}</span>
         </div>
       </div>
       <div className="flex items-center gap-2">
         <Tooltip content={isMuted ? "Unmute" : "Mute"}>
-          <button className="cursor-pointer" onClick={handleBtnVolume}>
+          <button className="cursor-pointer" onClick={toggleIsMuted}>
             {isMuted || volume === 0 ? (
               <VolumeX className="w-5 h-5" />
             ) : volume < 0.4 ? (

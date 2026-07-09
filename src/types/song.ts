@@ -2,6 +2,7 @@ export type Song = {
   id: number;
   name: string;
   image: string;
+  category: "library" | "main";
   artist: {
     name: string;
     image: string;

@@ -3,8 +3,9 @@ import {
   PanelLeftOpen,
   Maximize2,
   Minimize2,
-  Logs,
   Volume2,
+  Pause,
+  Play,
 } from "lucide-react";
 import { Tooltip } from "./tooltip";
 import { useLibraryStore } from "../stores/library-store";
@@ -19,6 +20,8 @@ export default function Library() {
   const isPlaying = useSongStore((state) => state.isPlaying);
   const currentSong = useSongStore((state) => state.currentSong);
   const toggleIsPlaying = useSongStore((state) => state.toggleIsPlaying);
+
+  const librarySongs = songs.filter((song) => song.category === "library");
 
   return (
     <section className="bg-stone-900 rounded-lg p-4">
@@ -62,34 +65,51 @@ export default function Library() {
           </Tooltip>
         )}
       </div>
-      <div className="mt-5">
-        <button className="hover:scale-105 text-xs flex items-center gap-2 cursor-pointer text-stone-200 hover:text-white font-medium">
-          <Logs className="w-5 h-5" />
-          Alphabetical
-        </button>
-      </div>
+
       <nav className="mt-10">
-        <ul>
-          {songs.map((song) => (
+        <ul
+          className={`${isMaximized ? "grid grid-cols-5 gap-1" : "flex flex-col gap-1"}`}
+        >
+          {librarySongs.map((song) => (
             <button
               key={song.id}
-              className={`flex gap-4 items-center hover:bg-stone-800 p-2 rounded-lg w-full cursor-pointer transition-colors ${currentSong.id === song.id ? "bg-green-950 text-green-500" : ""}  `}
+              className={`group flex gap-4 items-center hover:bg-stone-800 p-2 rounded-lg w-full cursor-pointer transition-colors ${currentSong.id === song.id ? "bg-green-950 text-green-500" : ""}`}
               onClick={() => toggleIsPlaying(song.id)}
             >
-              <img
-                src={song.image}
-                alt={`${song.name} Image Cover`}
-                className="h-15 w-15 rounded-lg"
-              />
-              <div className="flex flex-col items-start">
-                <h2 className="font-bold">{song.name}</h2>
-                <h5 className="text-stone-400 text-xs font-medium">
-                  {song.artist.name}
-                </h5>
+              <div className="relative">
+                <img
+                  src={song.image}
+                  alt={`${song.name} Image Cover`}
+                  className={`${!isCollapsed ? "w-15 h-15" : "w-8 h-8"} rounded-lg object-cover`}
+                />
+                <div
+                  className={`absolute inset-0 flex items-center justify-center bg-black/40 rounded-lg transition-opacity ${
+                    currentSong.id === song.id && isPlaying
+                      ? "opacity-100"
+                      : "opacity-0 group-hover:opacity-100"
+                  }`}
+                >
+                  {currentSong.id === song.id && isPlaying ? (
+                    <Pause className="w-5 h-5 text-white fill-white" />
+                  ) : (
+                    <Play className="w-5 h-5 text-white fill-white" />
+                  )}
+                </div>
               </div>
-              {currentSong.id === song.id && isPlaying ? (
-                <Volume2 className="ml-3 h-5 w-5" />
-              ) : null}
+
+              {!isCollapsed && (
+                <div className="flex flex-col items-start">
+                  <div className="flex items-center gap-2">
+                    <h2 className="font-bold line-clamp-1">{song.name}</h2>
+                    {currentSong.id === song.id && isPlaying ? (
+                      <Volume2 className="h-4 w-4" />
+                    ) : null}
+                  </div>
+                  <h5 className="text-stone-400 text-xs font-medium">
+                    {song.artist.name}
+                  </h5>
+                </div>
+              )}
             </button>
           ))}
         </ul>
